@@ -18,7 +18,7 @@ export const Login = () => {
   const handleGoogleAuth = async() => {
     try {
       let googleProvider = new GoogleAuthProvider()
-      let res = await signInWithPopup(auth , googleProvider)
+      await signInWithPopup(auth , googleProvider)
     } catch (error) {
       setError(JSON.stringify(error))
     }
