@@ -16,10 +16,10 @@ app.add_middleware(
 @app.get("/api/enrich")
 async def fetch(website:str = "",company:str = ""):
     if not company and not website:
-        return {"error" : "Any one parameter is required"}
+        return {"status":400,"message" : "Any one parameter is required"}
     try:
         res=requests.get(f"https://api.peopledatalabs.com/v5/company/enrich?website={website or ''}&name={company or ''}",headers={"X-API-Key":os.getenv("API_KEY")})
         print(res.json())
         return res.json()
     except Exception as e:
-        return {"error" : str(e)}
+        return {"status":400,"message" : str(e)}

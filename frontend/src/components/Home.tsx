@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../config/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { CompanyDetails } from './company-profile-tailwind';
 
 export const Home = () => {
   const [companyName, setCompanyName] = useState('');
   const [website, setWebsite] = useState('');
   const [companyData, setCompanyData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error,setError] = useState("")
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    const res =onAuthStateChanged(auth,(user)=>{
+      if(!user){
+        navigate('/login');
+      }
+    })
+    return res
+  })
 
   const handleLogout = async () => {
     try {
@@ -18,19 +30,32 @@ export const Home = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     setLoading(true);
+    setCompanyData(null)
     try {
+      const domain = website ? new URL(website).host : "" 
       const response = await fetch(
-        `YOUR_FASTAPI_ENDPOINT?company=${encodeURIComponent(companyName)}&website=${encodeURIComponent(website)}`
+        `${import.meta.env.VITE_API_ENDPOINT}?company=${encodeURIComponent(companyName)}&website=${encodeURIComponent(domain)}`
       );
       const data = await response.json();
+      if(!data.status || data.status != 200){
+        setCompanyData(null);
+        if(data.message){
+          setError(data.message)
+          return
+        }
+        setError(data.error)
+        return
+      }
       setCompanyData(data);
+      setError("")
     } catch (error) {
+      setError("Something went wrong")
       console.error('Error fetching company data:', error);
-    } finally {
-      setLoading(false);
+    } finally{
+      setLoading(false)
     }
   };
 
@@ -38,7 +63,7 @@ export const Home = () => {
     <div className="min-h-screen bg-gray-900 p-4">
       <div className="mx-auto max-w-4xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-white">Company Details Dashboard</h1>
+          <h1 className="text-2xl font-bold text-white">Company Details</h1>
           <button
             onClick={handleLogout}
             className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -58,7 +83,6 @@ export const Home = () => {
                 className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                required
               />
             </div>
             <div>
@@ -66,11 +90,10 @@ export const Home = () => {
                 Website
               </label>
               <input
-                type="url"
+                type='url'
                 className="w-full p-2 bg-gray-700 rounded border border-gray-600 text-white"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-                required
               />
             </div>
             <button
@@ -82,15 +105,9 @@ export const Home = () => {
             </button>
           </form>
         </div>
+        {error}
+        {companyData && <CompanyDetails company={companyData} />}
 
-        {companyData && (
-          <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Company Information</h2>
-            <pre className="bg-gray-700 p-4 rounded overflow-auto">
-              {JSON.stringify(companyData, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </div>
   );
