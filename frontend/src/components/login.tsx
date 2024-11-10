@@ -19,6 +19,7 @@ export const Login = () => {
     try {
       let googleProvider = new GoogleAuthProvider()
       await signInWithPopup(auth , googleProvider)
+      navigate("/")
     } catch (error) {
       setError(JSON.stringify(error))
     }
