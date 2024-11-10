@@ -1,7 +1,8 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
+import { GoogleAuthProvider } from "firebase/auth/web-extension";
 
 export const Register = () => {
   const [email, setEmail] = useState('');
@@ -9,7 +10,19 @@ export const Register = () => {
   const [loading,setLoading] = useState(false)
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
+  useEffect(()=>{
+    if(auth.currentUser){
+      navigate("/")
+    }
+  },[])
+  const handleGoogleAuth = async() => {
+    try {
+      let googleProvider = new GoogleAuthProvider()
+      await signInWithPopup(auth , googleProvider)
+    } catch (error) {
+      setError(JSON.stringify(error))
+    }
+  }
   const handleSubmit = async (e:any) => {
     e.preventDefault();
     try {
@@ -17,7 +30,7 @@ export const Register = () => {
       await createUserWithEmailAndPassword(auth, email, password);
       setLoading(false)
       navigate('/login');
-    } catch (error) {
+    } catch (error:any) {
         setLoading(false)
         console.log(error.message)
         error.message == "Firebase: Error (auth/email-already-in-use)." ? setError("Email already in use") : setError(error.message)
@@ -63,10 +76,11 @@ export const Register = () => {
               </button>
             </div>
           </form>
-          <div className="text-center">
+          <div className="text-center flex flex-col gap-y-2">
             <Link to="/login" className="text-indigo-400 hover:text-indigo-300">
               Already have an account? Login
             </Link>
+            <button onClick={handleGoogleAuth} className="px-4 py-1 bg-blue-600 rounded-md font-semibold text-white">Sign up with Google</button>
           </div>
         </div>
       </div>

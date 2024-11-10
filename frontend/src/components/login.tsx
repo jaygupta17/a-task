@@ -1,5 +1,5 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
 
@@ -10,6 +10,19 @@ export const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  useEffect(()=>{
+    if(auth.currentUser){
+      navigate("/")
+    }
+  },[])
+  const handleGoogleAuth = async() => {
+    try {
+      let googleProvider = new GoogleAuthProvider()
+      let res = await signInWithPopup(auth , googleProvider)
+    } catch (error) {
+      setError(JSON.stringify(error))
+    }
+  }
   const handleSubmit = async (e:any) => {
     e.preventDefault();
     try {
@@ -17,7 +30,7 @@ export const Login = () => {
       await signInWithEmailAndPassword(auth, email, password);
       setLoading(false)
       navigate('/');
-    } catch (error) {
+    } catch (error:any) {
         setLoading(false)
         console.log(error.message)
         error.message == "Firebase: Error (auth/invalid-credential)." ? setError("Invalid Credentials") : setError(error.message)
@@ -63,10 +76,11 @@ export const Login = () => {
               </button>
             </div>
           </form>
-          <div className="text-center">
+          <div className="text-center flex flex-col gap-y-2">
             <Link to="/register" className="text-indigo-400 hover:text-indigo-300">
               Don't have an account? Register
             </Link>
+            <button onClick={handleGoogleAuth} className="px-4 py-1 bg-blue-600 rounded-md font-semibold text-white">Sign in with Google</button>
           </div>
         </div>
       </div>
