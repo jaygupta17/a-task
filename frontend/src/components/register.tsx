@@ -1,8 +1,7 @@
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup,GoogleAuthProvider } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
-import { GoogleAuthProvider } from "firebase/auth/web-extension";
 
 export const Register = () => {
   const [email, setEmail] = useState('');
