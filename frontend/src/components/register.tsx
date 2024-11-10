@@ -1,9 +1,9 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../config/firebase";
 
-export const Login = () => {
+export const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading,setLoading] = useState(false)
@@ -14,20 +14,20 @@ export const Login = () => {
     e.preventDefault();
     try {
       setLoading(true)
-      await signInWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
       setLoading(false)
-      navigate('/');
+      navigate('/login');
     } catch (error) {
         setLoading(false)
         console.log(error.message)
-        error.message == "Firebase: Error (auth/invalid-credential)." ? setError("Invalid Credentials") : setError(error.message)
+        error.message == "Firebase: Error (auth/email-already-in-use)." ? setError("Email already in use") : setError(error.message)
     }
   };
     return(
         <div className="flex min-h-screen items-center justify-center bg-gray-900 px-4">
         <div className="w-full max-w-md space-y-8">
           <div>
-            <h2 className="mt-6 text-center text-3xl font-bold text-white">Sign in to your account</h2>
+            <h2 className="mt-6 text-center text-3xl font-bold text-white">Sign up to your account</h2>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && <div className="text-red-500 text-center">{error}</div>}
@@ -59,13 +59,13 @@ export const Login = () => {
                 type="submit"
                 className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
               >
-                {loading? "Loading":"Sign in"}
+                {loading ? "Loading" : "Sign up"}
               </button>
             </div>
           </form>
           <div className="text-center">
-            <Link to="/register" className="text-indigo-400 hover:text-indigo-300">
-              Don't have an account? Register
+            <Link to="/login" className="text-indigo-400 hover:text-indigo-300">
+              Already have an account? Login
             </Link>
           </div>
         </div>
